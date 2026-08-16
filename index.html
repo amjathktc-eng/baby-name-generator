@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Baby Name Finder & Random Generator | amjathkhan.com</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --accent: #2f81f7;
+      --accent-hover: #58a6ff;
+      --text-main: #c9d1d9;
+      --text-heading: #ffffff;
+      --border: #30363d;
+      --badge-bg: #21262d;
+      --generator-bg: #1f242d;
+      --gold-accent: #f1e05a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; }
+    
+    .container { max-width: 1000px; margin: 0 auto; }
+    
+    header { text-align: center; margin-bottom: 25px; }
+    header h1 { color: var(--text-heading); font-size: 2.2rem; margin-bottom: 8px; }
+    header p { font-size: 1rem; color: #8b949e; }
+
+    /* Generator Box */
+    .generator-panel {
+      background: var(--generator-bg);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 25px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(47, 129, 247, 0.15);
+    }
+    .generator-panel h2 { color: var(--text-heading); font-size: 1.4rem; margin-bottom: 12px; }
+    
+    .generate-btn {
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .generate-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+    .generated-result {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--card-bg);
+      border: 1px dashed var(--accent);
+      border-radius: 8px;
+      display: none;
+    }
+    .generated-name { font-size: 1.8rem; font-weight: 700; color: var(--gold-accent); margin-bottom: 6px; }
+
+    /* Control Panel */
+    .filter-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+    }
+
+    .filter-group { display: flex; flex-direction: column; gap: 6px; }
+    .filter-group label { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; color: #8b949e; }
+    .filter-group select, .filter-group input {
+      background: var(--bg-color);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      border-radius: 6px;
+      outline: none;
+      font-size: 0.95rem;
+    }
+    .filter-group select:focus, .filter-group input:focus { border-color: var(--accent); }
+
+    /* A-Z Bar */
+    .alphabet-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 25px;
+      justify-content: center;
+    }
+    .letter-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .letter-btn:hover, .letter-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Results Grid */
+    .results-count { margin-bottom: 15px; font-weight: 500; font-size: 0.9rem; }
+    .name-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+    
+    .name-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .card-title { color: var(--text-heading); font-size: 1.4rem; font-weight: 700; }
+    .fav-btn { background: none; border: none; cursor: pointer; font-size: 1.2rem; color: #8b949e; }
+    .fav-btn.active { color: #f85149; }
+    
+    .meaning { font-size: 0.95rem; color: #8b949e; margin-bottom: 12px; line-height: 1.4; }
+    
+    .tags-container { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; }
+    .tag { font-size: 0.75rem; background: var(--badge-bg); border: 1px solid var(--border); padding: 3px 8px; border-radius: 20px; }
+    
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    .copy-btn:hover { background: var(--accent); color: #fff; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Baby Name Search & Random Generator</h1>
+    <p>Discover meaningful, classic, and modern baby names tailored to your preferences.</p>
+  </header>
+
+  <!-- Interactive Random Generator Box -->
+  <div class="generator-panel">
+    <h2>Need Instant Inspiration?</h2>
+    <p style="margin-bottom: 15px; color: #8b949e; font-size: 0.9rem;">Generate a random name based on your selected filters below!</p>
+    <button class="generate-btn" onclick="generateRandomName()">🎲 Generate Random Name</button>
+    
+    <div class="generated-result" id="generatedResult">
+      <div class="generated-name" id="genName">-</div>
+      <p class="meaning" id="genMeaning">-</p>
+      <div class="tags-container" id="genTags" style="justify-content: center; margin-bottom: 12px;"></div>
+      <button class="copy-btn" id="genCopyBtn" style="max-width: 200px; margin: 0 auto;">Copy Name</button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-panel">
+    <div class="filter-group">
+      <label>Search Name or Meaning</label>
+      <input type="text" id="searchInput" placeholder="e.g. Leila, Light...">
+    </div>
+    <div class="filter-group">
+      <label>Gender</label>
+      <select id="genderSelect">
+        <option value="All">All Genders</option>
+        <option value="Male">Boy / Male</option>
+        <option value="Female">Girl / Female</option>
+        <option value="Unisex">Unisex</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Religion / Culture</label>
+      <select id="religionSelect">
+        <option value="All">All Religions</option>
+        <option value="Islam">Islam / Arabic</option>
+        <option value="Hinduism">Hinduism / Indian</option>
+        <option value="Christianity">Christianity / Biblical</option>
+        <option value="Sikhism">Sikhism</option>
+        <option value="Universal">Universal / General</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Style</label>
+      <select id="styleSelect">
+        <option value="All">All Styles</option>
+        <option value="Modern">Modern</option>
+        <option value="Authentic">Authentic</option>
+        <option value="Classic">Classic</option>
+        <option value="Unique">Unique</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Length</label>
+      <select id="lengthSelect">
+        <option value="All">Any Length</option>
+        <option value="Short">Short (3-4 letters)</option>
+        <option value="Medium">Medium (5-6 letters)</option>
+        <option value="Long">Long (7+ letters)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- A-Z Selection -->
+  <div class="alphabet-bar" id="alphabetBar">
+    <button class="letter-btn active" data-letter="All">ALL</button>
+  </div>
+
+  <div class="results-count" id="resultsCount">Loading dataset...</div>
+  <div class="name-grid" id="nameGrid"></div>
+</div>
+
+<script>
+let babyNames = [];
+let selectedLetter = 'All';
+let favorites = JSON.parse(localStorage.getItem('favNames')) || [];
+
+async function loadData() {
+  try {
+    const res = await fetch('baby_names.json');
+    const rawData = await res.json();
+    
+    // Normalize field names (uppercase or lowercase JSON compatibility)
+    babyNames = rawData.map(item => {
+      let rawMeaning = item.meaning || item.Meaning || "";
+      if (rawMeaning && !rawMeaning.endsWith(")")) {
+        rawMeaning += ")";
+      }
+      return {
+        name: item.name || item.Name || "",
+        gender: item.gender || item.Gender || "Universal",
+        religion: item.religion || item.Religion || "Universal",
+        style: item.style || item.Style || "Modern",
+        meaning: rawMeaning
+      };
+    });
+  } catch (err) {
+    console.error("Error loading JSON dataset:", err);
+  }
+  renderNames();
+}
+
+function initAlphabet() {
+  const bar = document.getElementById('alphabetBar');
+  for (let i = 65; i <= 90; i++) {
+    const letter = String.fromCharCode(i);
+    const btn = document.createElement('button');
+    btn.className = 'letter-btn';
+    btn.textContent = letter;
+    btn.dataset.letter = letter;
+    btn.onclick = () => {
+      document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedLetter = letter;
+      renderNames();
+    };
+    bar.appendChild(btn);
+  }
+}
+
+function getFilteredData() {
+  const searchVal = document.getElementById('searchInput').value.toLowerCase();
+  const genderVal = document.getElementById('genderSelect').value;
+  const religionVal = document.getElementById('religionSelect').value;
+  const styleVal = document.getElementById('styleSelect').value;
+  const lengthVal = document.getElementById('lengthSelect').value;
+
+  return babyNames.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchVal) || item.meaning.toLowerCase().includes(searchVal);
+    const matchesGender = genderVal === 'All' || item.gender === genderVal;
+    const matchesReligion = religionVal === 'All' || item.religion === religionVal;
+    const matchesStyle = styleVal === 'All' || item.style === styleVal;
+    const matchesLetter = selectedLetter === 'All' || item.name.toUpperCase().startsWith(selectedLetter);
+    
+    let matchesLength = true;
+    const nameLen = item.name.length;
+    if (lengthVal === 'Short') matchesLength = nameLen >= 3 && nameLen <= 4;
+    else if (lengthVal === 'Medium') matchesLength = nameLen >= 5 && nameLen <= 6;
+    else if (lengthVal === 'Long') matchesLength = nameLen >= 7;
+
+    return matchesSearch && matchesGender && matchesReligion && matchesStyle && matchesLetter && matchesLength;
+  });
+}
+
+function renderNames() {
+  const filtered = getFilteredData();
+  const grid = document.getElementById('nameGrid');
+
+  document.getElementById('resultsCount').textContent = `Showing ${filtered.length} name(s)`;
+  grid.innerHTML = '';
+
+  filtered.forEach(item => {
+    const isFav = favorites.includes(item.name);
+    const card = document.createElement('div');
+    card.className = 'name-card';
+    card.innerHTML = `
+      <div>
+        <div class="card-header">
+          <span class="card-title">${item.name}</span>
+          <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFav('${item.name}')">♥</button>
+        </div>
+        <p class="meaning">${item.meaning}</p>
+        <div class="tags-container">
+          <span class="tag">${item.gender}</span>
+          <span class="tag">${item.religion}</span>
+          <span class="tag">${item.style}</span>
+        </div>
+      </div>
+      <button class="copy-btn" onclick="copyName('${item.name}', this)">Copy Name</button>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function generateRandomName() {
+  const filtered = getFilteredData();
+  const box = document.getElementById('generatedResult');
+  
+  if (filtered.length === 0) {
+    alert("No names match your current filter settings. Try broadening your criteria!");
+    return;
+  }
+
+  const randomIndex = Math.floor(Math.random() * filtered.length);
+  const picked = filtered[randomIndex];
+
+  document.getElementById('genName').textContent = picked.name;
+  document.getElementById('genMeaning').textContent = picked.meaning;
+  document.getElementById('genTags').innerHTML = `
+    <span class="tag">${picked.gender}</span>
+    <span class="tag">${picked.religion}</span>
+    <span class="tag">${picked.style}</span>
+  `;
+  
+  const copyBtn = document.getElementById('genCopyBtn');
+  copyBtn.onclick = () => copyName(picked.name, copyBtn);
+  
+  box.style.display = 'block';
+}
+
+function toggleFav(name) {
+  if (favorites.includes(name)) {
+    favorites = favorites.filter(n => n !== name);
+  } else {
+    favorites.push(name);
+  }
+  localStorage.setItem('favNames', JSON.stringify(favorites));
+  renderNames();
+}
+
+function copyName(name, btn) {
+  navigator.clipboard.writeText(name);
+  const originalText = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = originalText, 1500);
+}
+
+document.querySelectorAll('select, input').forEach(el => el.addEventListener('input', renderNames));
+initAlphabet();
+loadData();
+</script>
+
+</body>
+</html>
